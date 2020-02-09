@@ -22,22 +22,20 @@ client.on('message', message => {
         let randWord = wordArray[Math.floor(Math.random()*wordArray.length)]
         // message.channel.send("First, we must define " + randWord + ".");
 
-        if (randWord === 'garglemoore') {
-            message.channel.send("First, we must define " + randWord + ".");
+//         if (randWord === 'garglemoore') {
+//             message.channel.send("First, we must define " + randWord + ".");
 
-            message.channel.send("According to my sources...")
-            message.channel.send("Garglemoore")
-            message.channel.send("A mythicial creature capable of gargling semen at intense volumes.")
-            return;
-        }
+//             message.channel.send("According to my sources...")
+//             message.channel.send("Garglemoore")
+//             return;
+//         }
 
-        if (randWord === 'phil') {
-            message.channel.send("First, we must define " + randWord + ".");
+//         if (randWord === 'phil') {
+//             message.channel.send("First, we must define " + randWord + ".");
 
-            message.channel.send("According to my sources...")
-            message.channel.send("Phil is a real piece of shit")
-            return;
-        }
+//             message.channel.send("According to my sources...")
+//             return;
+//         }
 
         if (randWord !== 'and' && randWord !== 'the' && randWord !== 'or' && randWord !== 'to' && randWord !== 'a') {
             message.channel.send("First, we must define " + randWord + ".");
