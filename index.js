@@ -29,18 +29,18 @@ client.on('message', async message => {
             switch(cmd) {
                 case 'play':
                     execute(message, serverQueue);
+                    message.delete();
                     break;
                 case 'skip':
                     skip(message, serverQueue);
+                    message.delete();
                     break;
                 case 'stop':
                     stop(message, serverQueue);
+                    message.delete();
                     break;
                 case 'help':
-                    message.channel.send("> /define");
-                    message.channel.send("> /youtube");
-                    message.channel.send("> /roll");
-                    message.channel.send("> /help");
+                    message.channel.send("```/define\n/youtube\n/roll\n/help```");
                     break;
                 case 'define':
                     defineWord(args, message);
@@ -54,7 +54,7 @@ client.on('message', async message => {
                     search(args, message);
                     break;
                 default:
-                    message.channel.send("> im still learning, " + cmd + " is not a command. Use /help to find a list of commands.");
+                    message.channel.send("```im still learning, " + cmd + " is not a command. Use /help to find a list of commands.```");
                     break;
             }
         }
@@ -67,12 +67,12 @@ async function execute(message, serverQueue) {
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel)
       return message.channel.send(
-        "> You need to be in a voice channel to play music!"
+        "```You need to be in a voice channel to play music!```"
       );
     const permissions = voiceChannel.permissionsFor(message.client.user);
     if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
       return message.channel.send(
-        "> I need the permissions to join and speak in your voice channel!"
+        "```I need the permissions to join and speak in your voice channel!```"
       );
     }
   
@@ -107,24 +107,24 @@ async function execute(message, serverQueue) {
       }
     } else {
       serverQueue.songs.push(song);
-      return message.channel.send(`> **${song.title}** has been added to the queue!`);
+      return message.channel.send("```CSS\n[" + song.title + "] has been added to the queue!```");
     }
   }
   
   function skip(message, serverQueue) {
     if (!message.member.voice.channel)
       return message.channel.send(
-        "> You have to be in a voice channel to stop the music!"
+        "```You have to be in a voice channel to stop the music!```"
       );
     if (!serverQueue)
-      return message.channel.send("> There is no song that I could skip!");
+      return message.channel.send("```There is no song that I could skip!```");
     serverQueue.connection.dispatcher.end();
   }
   
   function stop(message, serverQueue) {
     if (!message.member.voice.channel)
       return message.channel.send(
-        "> You have to be in a voice channel to stop the music!"
+        "```You have to be in a voice channel to stop the music!```"
       );
     serverQueue.songs = [];
     serverQueue.connection.dispatcher.end();
@@ -149,14 +149,14 @@ async function execute(message, serverQueue) {
       })
       .on("error", (error) => {
           console.error(error);
-          serverQueue.textChannel.send(`> I have encountered an error. pls dont me mad.`);
+          serverQueue.textChannel.send("```I have encountered an error. pls dont me mad.```");
           return;
       });
     dispatcher.setVolumeLogarithmic(serverQueue.volume / 14);
-    serverQueue.textChannel.send(`> Now playing: **${song.title}**`);
+    serverQueue.textChannel.send("```CSS\nNow playing: [" + song.title + "]```");
     } catch (e) {
         console.log(e);
-        serverQueue.textChannel.send(`> I have encountered an error. pls dont me mad.`);
+        serverQueue.textChannel.send("```I have encountered an error. pls dont me mad.```");
     }
   }
 
@@ -167,13 +167,10 @@ function defineWord(args, message) {
         console.log(entries[0].word);
         console.log(entries[0].definition);
         console.log(entries[0].example);
-        message.channel.send("> According to my sources...");
-        message.channel.send("> " + entries[0].word);
-        message.channel.send("> " + entries[0].definition);
-        message.channel.send("> " + entries[0].example);
+        message.channel.send("```" + entries[0].definition + "\n" +  entries[0].example + "```");
       }).catch((error) => {
         console.error(error.message);
-        message.channel.send("> looks at you with a blank stare");
+        message.channel.send("```looks at you with a blank stare```");
     })
 }
 
@@ -182,26 +179,34 @@ function randomRoll(args, message) {
     var numberOfSides = parseInt(args[0]);
     console.log(numberOfSides);
     if (isNaN(numberOfSides) || numberOfSides <= 0) {
-        message.channel.send("> looks at you with a blank stare");
+        message.channel.send("```looks at you with a blank stare```");
         return;
     }
     var parsedCount = parseInt(args[1]);
 
     if (parsedCount == null || isNaN(parsedCount) || parsedCount < 2 || parsedCount > 10) {
         rollCount = 1;
-        message.channel.send("> begins rolling a " + numberOfSides + " sided dice...");
     }
     else {
         rollCount = parsedCount;
-        message.channel.send("> begins rolling a " + numberOfSides + " sided dice " + rollCount + " times...");
     }
 
     var rolls = 0;
+    var randList = [];
     while (rolls < rollCount) {
         var rand = Math.floor(Math.random() * numberOfSides) + 1;
-        message.channel.send("> [" + rand + "]");
+        randList.push("[" + rand + "]");
         rolls++;
     }
+    if (randList.length > 1) {
+        message.channel.send("```begins rolling a " + numberOfSides + " sided dice... \n" + randList + "```");
+
+    }
+    else {
+        message.channel.send("```begins rolling a " + numberOfSides + " sided dice " + rollCount + " times... \n" + randList + "```");
+
+    }
+    // message.channel.send("> " + randList);
 }
 
 function search(args, message) {
@@ -222,7 +227,7 @@ function search(args, message) {
             console.log(myJson);
             const id = myJson.items.map(element => element.id);
             if (id == null || myJson.items.length == 0) {
-                message.channel.send("> looks at you with a blank stare");
+                message.channel.send("```looks at you with a blank stare```");
             }
             id.forEach(ele => {
                 console.log(baseUrl + ele.videoId);
@@ -231,7 +236,7 @@ function search(args, message) {
                     message.channel.send(baseUrl + ele.videoId);
                 }
                 else {
-                    message.channel.send("> looks at you with a blank stare");
+                    message.channel.send("```looks at you with a blank stare```");
                 }
             });
         }); 
