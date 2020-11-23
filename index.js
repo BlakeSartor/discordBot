@@ -8,6 +8,8 @@ const client = new Discord.Client();
 
 const queue = new Map();
 
+const playList = []
+
 client.login(token);
 
 client.once('ready', () => {
@@ -27,6 +29,15 @@ client.on('message', async message => {
 
             args = args.splice(1);
             switch(cmd) {
+                case 'playlist':
+                    playlist(message);
+                    break;
+                case 'showlist':
+                    showList(message);
+                    break;
+                case 'list':
+                    addToPlayList(args, message);
+                    break;
                 case 'play':
                     execute(message, serverQueue);
                     message.delete();
@@ -45,21 +56,97 @@ client.on('message', async message => {
                 case 'define':
                     defineWord(args, message);
                     break;
-
                 case 'roll':
                     randomRoll(args, message);
                     break;
                 case 'youtube':
-                    // message.channel.send("> looks at you with a blank stare")
                     search(args, message);
                     break;
                 default:
-                    message.channel.send("```im still learning, " + cmd + " is not a command. Use /help to find a list of commands.```");
+                    sendAndDissolve("```im still learning, " + cmd + " is not a command. Use /help to find a list of commands.```", message)
                     break;
             }
         }
     }
 })
+
+
+
+function showList(message) {
+    sendAndDissolve("```" + playList + "```", message)
+}
+
+async function playlist(message) {
+
+    playList.forEach(element => {
+        // console.log("executing on " + element);
+        someFunction(message, serverQueue, element);
+    })
+}
+
+
+async function someFunction(message, serverQueue, element) {
+
+    console.log("ok here"  + element);
+  
+  
+    // const songInfo = await ytdl.getInfo(songItem);
+    // const song = {
+    //       title: songInfo.videoDetails.title,
+    //       url: songInfo.videoDetails.video_url,
+    //  };
+  
+    // if (!serverQueue) {
+    //   const queueContruct = {
+    //     textChannel: message.channel,
+    //     voiceChannel: voiceChannel,
+    //     connection: null,
+    //     songs: [],
+    //     volume: 5,
+    //     playing: true
+    //   };
+  
+    //   queue.set(message.guild.id, queueContruct);
+  
+    //   queueContruct.songs.push(song);
+  
+    //   try {
+    //     var connection = await voiceChannel.join();
+    //     queueContruct.connection = connection;
+    //     play(message.guild, queueContruct.songs[0]);
+    //   } catch (err) {
+    //     console.log(err);
+    //     queue.delete(message.guild.id);
+    //     return message.channel.send(err);
+    //   }
+    // } else {
+    //   serverQueue.songs.push(song);
+    //   return message.channel.send("```CSS\n[" + song.title + "] has been added to the queue!```");
+    // }
+  }
+
+function addToPlayList(args, message) {
+    sendAndDissolve("```" + args[0] + " added to owens plaything```", message)
+    playList.push(args[0])
+}
+
+function sendAndDissolve(string, message) {
+    if (message.channel.name != 'garglemoore') {
+        message.channel.send(string)
+        .then(msg => {
+            msg.delete({ timeout : 10000})
+            message.delete({timeout: 10000});
+            return;
+    
+        })
+        .catch(err => {
+            console.log(err)
+        });
+    }
+    else {
+        message.channel.send(string)
+    }
+}
 
 async function execute(message, serverQueue) {
     const args = message.content.split(" ");
@@ -206,7 +293,6 @@ function randomRoll(args, message) {
         message.channel.send("```begins rolling a " + numberOfSides + " sided dice " + rollCount + " times... \n" + randList + "```");
 
     }
-    // message.channel.send("> " + randList);
 }
 
 function search(args, message) {
