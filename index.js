@@ -29,6 +29,9 @@ client.on('message', async message => {
 
             args = args.splice(1);
             switch(cmd) {
+                case 'random':
+                    randomPlayer(message)
+                    break;
                 case 'playlist':
                     playlist(message);
                     break;
@@ -70,6 +73,30 @@ client.on('message', async message => {
     }
 })
 
+function randomPlayer(message) {
+
+    const vs = message.member.voice.channel
+    var someList = []
+    var members = vs.members
+    members.forEach(element => {
+        someList.push(element.user.username)
+    });
+
+    someList = someList.filter(e => e !== 'Garglemoore');
+    var rollCount = someList.length;
+
+    var numberOfSides = 100
+    var rolls = 0;
+    var randList = [];
+    while (rolls < rollCount) {
+        var rand = Math.floor(Math.random() * numberOfSides) + 1;
+        randList.push(someList[rolls] + " rolled a [" + rand + "]\n");
+        rolls++;
+    }
+    var stringy = "```begins rolling a " + numberOfSides + " sided dice... \n" + randList.toString() + "```"
+    var newOne = stringy.replace(/,/g,"")
+    message.channel.send(newOne);
+}
 
 
 function showList(message) {
