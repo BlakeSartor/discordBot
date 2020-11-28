@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const {prefix, token, youtubeKey} = require('./config.json');
+const {prefix, token, youtubeKey, nomicsKey} = require('./config.json');
 const ud = require('urban-dictionary');
 const fetch = require("node-fetch");
 const ytdl = require('ytdl-core');
@@ -29,6 +29,9 @@ client.on('message', async message => {
 
             args = args.splice(1);
             switch(cmd) {
+                case 'c':
+                    cryptoTicker(args, message)
+                    break;
                 case 'random':
                     randomPlayer(message)
                     break;
@@ -72,6 +75,7 @@ client.on('message', async message => {
         }
     }
 })
+
 
 function randomPlayer(message) {
 
@@ -320,6 +324,41 @@ function randomRoll(args, message) {
         message.channel.send("```begins rolling a " + numberOfSides + " sided dice " + rollCount + " times... \n" + randList + "```");
 
     }
+}
+
+function cryptoTicker(args, message) {
+  var crypto = args[0].toUpperCase();  
+  var url = "https://api.nomics.com/v1/currencies/ticker?key=6cb84281821e2b50775cf62e762a45fc&ids=" + crypto + "&interval=1d,7d,30d";
+  
+  fetch(url)
+  .then(response => response.json())
+  .then(data => {
+      // console.log(data);
+      var name = data[0].name;
+      var price = parseFloat(data[0].price);
+      var oneDayDelta = data[0]['1d'].price_change_pct*100;
+      var sevenDayDelta = data[0]['7d'].price_change_pct*100;
+      var thirtyDayDelta = data[0]['30d'].price_change_pct*100;
+
+      // add if/else to colorize the text; if positive green text, else red text?? 
+      // make the price rounding into a function?
+      // check if valid crypto ticker -- otherwise run as a stock?
+      //
+
+      if(price>1){
+        price = price.toFixed(2);
+        message.channel.send("```" + name + " = " + price + " USD: 1D=" + oneDayDelta.toFixed(2) + "%, 7D=" + sevenDayDelta.toFixed(2) + "%, 30D=" + thirtyDayDelta.toFixed(2) + "%" + "```");
+         
+      }
+      else{
+        var priceRounded = price.toFixed(1-Math.floor(Math.log(Math.abs(price))/Math.log(10)));
+        message.channel.send("```" + name + " = " + priceRounded + " USD: 1D=" + oneDayDelta.toFixed(2) + "%, 7D=" + sevenDayDelta.toFixed(2) + "%, 30D=" + thirtyDayDelta.toFixed(2) + "%" + "```");
+      }
+  });
+}
+
+function stockTicker(args, message){
+  
 }
 
 function search(args, message) {
