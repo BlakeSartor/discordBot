@@ -3,6 +3,7 @@ const {prefix, token, youtubeKey, nomicsKEy} = require('./config.json');
 const ud = require('urban-dictionary');
 const fetch = require("node-fetch");
 const ytdl = require('ytdl-core');
+const glamorous = require("./glam.json")
 
 const client = new Discord.Client();
 
@@ -29,6 +30,9 @@ client.on('message', async message => {
 
             args = args.splice(1);
             switch(cmd) {
+                case 'glam':
+                    glam(message, serverQueue)
+                    break;
                 case 'random':
                     randomPlayer(message)
                     break;
@@ -64,6 +68,48 @@ client.on('message', async message => {
     }
 })
 
+async function glam(message, serverQueue) {
+    const voiceChannel = message.member.voice.channel;
+    if (!voiceChannel)
+      return message.channel.send(
+        "```You need to be in a voice channel to play music!```"
+      );
+    const permissions = voiceChannel.permissionsFor(message.client.user);
+    if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
+      return message.channel.send(
+        "```I need the permissions to join and speak in your voice channel!```"
+      );
+    }
+
+    if (!serverQueue) {
+        const queueContruct = {
+          textChannel: message.channel,
+          voiceChannel: voiceChannel,
+          connection: null,
+          songs: [],
+          volume: 5,
+          playing: true
+        };
+    
+        queue.set(message.guild.id, queueContruct);
+    
+        queueContruct.songs.push(glamorous);
+    
+        try {
+          var connection = await voiceChannel.join();
+          queueContruct.connection = connection;
+          play(message.guild, queueContruct.songs[0]);
+        } catch (err) {
+          console.log(err);
+          queue.delete(message.guild.id);
+          return message.channel.send(err);
+        }
+      } else {
+        serverQueue.songs.push(glamorous);
+        return message.channel.send("```CSS\n[" + glamorous.title + "] has been added to the queue!```");
+      }
+    
+}
 
 function randomPlayer(message) {
 
@@ -128,6 +174,8 @@ async function execute(message, serverQueue) {
           title: songInfo.videoDetails.title,
           url: songInfo.videoDetails.video_url,
      };
+
+     console.log(song)
   
     if (!serverQueue) {
       const queueContruct = {
