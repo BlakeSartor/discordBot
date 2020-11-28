@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const {prefix, token, youtubeKey, nomicsKey} = require('./config.json');
+const {prefix, token, youtubeKey, nomicsKEy} = require('./config.json');
 const ud = require('urban-dictionary');
 const fetch = require("node-fetch");
 const ytdl = require('ytdl-core');
@@ -29,20 +29,8 @@ client.on('message', async message => {
 
             args = args.splice(1);
             switch(cmd) {
-                case 'c':
-                    cryptoTicker(args, message)
-                    break;
                 case 'random':
                     randomPlayer(message)
-                    break;
-                case 'playlist':
-                    playlist(message);
-                    break;
-                case 'showlist':
-                    showList(message);
-                    break;
-                case 'list':
-                    addToPlayList(args, message);
                     break;
                 case 'play':
                     execute(message, serverQueue);
@@ -69,7 +57,7 @@ client.on('message', async message => {
                     search(args, message);
                     break;
                 default:
-                    sendAndDissolve("```im still learning, " + cmd + " is not a command. Use /help to find a list of commands.```", message)
+                    cryptoTicker(cmd, message)
                     break;
             }
         }
@@ -100,65 +88,6 @@ function randomPlayer(message) {
     var stringy = "```begins rolling a " + numberOfSides + " sided dice... \n" + randList.toString() + "```"
     var newOne = stringy.replace(/,/g,"")
     message.channel.send(newOne);
-}
-
-
-function showList(message) {
-    sendAndDissolve("```" + playList + "```", message)
-}
-
-async function playlist(message) {
-
-    playList.forEach(element => {
-        // console.log("executing on " + element);
-        someFunction(message, serverQueue, element);
-    })
-}
-
-
-async function someFunction(message, serverQueue, element) {
-
-    console.log("ok here"  + element);
-  
-  
-    // const songInfo = await ytdl.getInfo(songItem);
-    // const song = {
-    //       title: songInfo.videoDetails.title,
-    //       url: songInfo.videoDetails.video_url,
-    //  };
-  
-    // if (!serverQueue) {
-    //   const queueContruct = {
-    //     textChannel: message.channel,
-    //     voiceChannel: voiceChannel,
-    //     connection: null,
-    //     songs: [],
-    //     volume: 5,
-    //     playing: true
-    //   };
-  
-    //   queue.set(message.guild.id, queueContruct);
-  
-    //   queueContruct.songs.push(song);
-  
-    //   try {
-    //     var connection = await voiceChannel.join();
-    //     queueContruct.connection = connection;
-    //     play(message.guild, queueContruct.songs[0]);
-    //   } catch (err) {
-    //     console.log(err);
-    //     queue.delete(message.guild.id);
-    //     return message.channel.send(err);
-    //   }
-    // } else {
-    //   serverQueue.songs.push(song);
-    //   return message.channel.send("```CSS\n[" + song.title + "] has been added to the queue!```");
-    // }
-  }
-
-function addToPlayList(args, message) {
-    sendAndDissolve("```" + args[0] + " added to owens plaything```", message)
-    playList.push(args[0])
 }
 
 function sendAndDissolve(string, message) {
@@ -327,13 +256,19 @@ function randomRoll(args, message) {
 }
 
 function cryptoTicker(args, message) {
-  var crypto = args[0].toUpperCase();  
-  var url = "https://api.nomics.com/v1/currencies/ticker?key=" + nomicsKey + "&ids=" + crypto + "&interval=1d,7d,30d";
+  var crypto = args.toUpperCase();  
+  var url = "https://api.nomics.com/v1/currencies/ticker?key=" + nomicsKEy +"&ids=" + crypto + "&interval=1d,7d,30d";
   
   fetch(url)
   .then(response => response.json())
   .then(data => {
-      // console.log(data);
+      console.log(data)
+      console.log(data.length)
+
+      if (data.length <= 0) {
+        sendAndDissolve("```im still learning, " + args + " is not a command. Use /help to find a list of commands.```", message)
+      } else {
+
       var name = data[0].name;
       var price = parseFloat(data[0].price);
       var oneDayDelta = data[0]['1d'].price_change_pct*100;
@@ -354,6 +289,7 @@ function cryptoTicker(args, message) {
         var priceRounded = price.toFixed(1-Math.floor(Math.log(Math.abs(price))/Math.log(10)));
         message.channel.send("```" + name + " = " + priceRounded + " USD: 1D=" + oneDayDelta.toFixed(2) + "%, 7D=" + sevenDayDelta.toFixed(2) + "%, 30D=" + thirtyDayDelta.toFixed(2) + "%" + "```");
       }
+    }
   });
 }
 
