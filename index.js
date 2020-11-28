@@ -328,7 +328,7 @@ function randomRoll(args, message) {
 
 function cryptoTicker(args, message) {
   var crypto = args[0].toUpperCase();  
-  var url = "https://api.nomics.com/v1/currencies/ticker?key=6cb84281821e2b50775cf62e762a45fc&ids=" + crypto + "&interval=1d,7d,30d";
+  var url = "https://api.nomics.com/v1/currencies/ticker?key=" + nomicsKey + "&ids=" + crypto + "&interval=1d,7d,30d";
   
   fetch(url)
   .then(response => response.json())
@@ -358,7 +358,7 @@ function cryptoTicker(args, message) {
 }
 
 function stockTicker(args, message){
-  
+
 }
 
 function search(args, message) {
