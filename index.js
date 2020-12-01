@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const {prefix, token, youtubeKey, nomicsKEy} = require('./config.json');
+const {prefix, token, youtubeKey, nomicsKey, alphaVantageKey} = require('./config.json');
 const ud = require('urban-dictionary');
 const fetch = require("node-fetch");
 const ytdl = require('ytdl-core');
@@ -59,6 +59,9 @@ client.on('message', async message => {
                     break;
                 case 'youtube':
                     search(args, message);
+                    break;
+                case 's':
+                    stockTicker(args, message)
                     break;
                 default:
                     cryptoTicker(cmd, message)
@@ -265,45 +268,69 @@ function randomRoll(args, message) {
 
 function cryptoTicker(args, message) {
   var crypto = args.toUpperCase();  
-  var url = "https://api.nomics.com/v1/currencies/ticker?key=" + nomicsKEy +"&ids=" + crypto + "&interval=1d,7d,30d";
+  var url = "https://api.nomics.com/v1/currencies/ticker?key=" + nomicsKey +"&ids=" + crypto + "&interval=1d,7d,30d";
   
   fetch(url)
   .then(response => response.json())
   .then(data => {
-      console.log(data)
-      console.log(data.length)
+      console.log(data);
+      console.log(data.length);
 
-      if (data.length <= 0) {
-        sendAndDissolve("```im still learning, " + args + " is not a command. Use /help to find a list of commands.```", message)
-      } else {
-
+      if(parseInt(data.length) == 0){ //WHY THIS NO WORK?!?! -- FIXED -- WOW, crazy! So if data.status is "undefined" the code hangs there. So first check if undefined, then check if dead/inactive, then produce results. WOWOWOWOOWW
+        invalidCommand(args, message);
+      }
+      else if(data[0].status == "dead" || data[0].status == "inactive"){
+        args = args.toUpperCase() + " is DEAD/INACTIVE or";
+        invalidCommand(args, message);
+      }
+      
+      else{
       var name = data[0].name;
       var price = parseFloat(data[0].price);
       var oneDayDelta = data[0]['1d'].price_change_pct*100;
       var sevenDayDelta = data[0]['7d'].price_change_pct*100;
       var thirtyDayDelta = data[0]['30d'].price_change_pct*100;
+      var allTimeHigh = parseFloat(data[0].high);
+      var allTimeHighDate = data[0].high_timestamp; // maybe change format to MM-DD-YY???
 
       // add if/else to colorize the text; if positive green text, else red text?? 
       // make the price rounding into a function?
       // check if valid crypto ticker -- otherwise run as a stock?
-      //
-
+      
       if(price>1){
         price = price.toFixed(2);
-        message.channel.send("```" + name + " = " + price + " USD: 1D=" + oneDayDelta.toFixed(2) + "%, 7D=" + sevenDayDelta.toFixed(2) + "%, 30D=" + thirtyDayDelta.toFixed(2) + "%" + "```");
+        message.channel.send("```" + name + " = " + price + " USD: 1D=" + oneDayDelta.toFixed(2) + "%, 7D=" + sevenDayDelta.toFixed(2) + "%, 30D=" + thirtyDayDelta.toFixed(2) + "%, ATH=$" + allTimeHigh.toFixed(2) + "|" + allTimeHighDate.split("T")[0] + "```");
          
       }
       else{
         var priceRounded = price.toFixed(1-Math.floor(Math.log(Math.abs(price))/Math.log(10)));
-        message.channel.send("```" + name + " = " + priceRounded + " USD: 1D=" + oneDayDelta.toFixed(2) + "%, 7D=" + sevenDayDelta.toFixed(2) + "%, 30D=" + thirtyDayDelta.toFixed(2) + "%" + "```");
+        message.channel.send("```" + name + " = " + priceRounded + " USD: 1D=" + oneDayDelta.toFixed(2) + "%, 7D=" + sevenDayDelta.toFixed(2) + "%, 30D=" + thirtyDayDelta.toFixed(2) + "%, ATH=$" + allTimeHigh.toFixed(2) + "|" + allTimeHighDate.split("T")[0] + "```");
       }
-    }
+      }
   });
 }
 
-function stockTicker(args, message){
-
+function invalidCommand(args, message){
+  sendAndDissolve("```im still learning, " + args + " is not a command. Use /help to find a list of commands.```", message);
+  message.delete({timeout: 10000});
 }
+
+function stockTicker(args, message){
+  var ticker = args.toUpperCase();
+  var url = "https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker + "&apikey=" + alphaVantageKey;
+
+
+  fetch(url)
+  .then(response => response.json())
+  .then(response => {
+      console.log(response)
+      message.channel.send("this works?");
+
+
+    });
+  }
+  
+
 
 function search(args, message) {
     var searchPhrase = args.join();
