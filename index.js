@@ -4,6 +4,9 @@ const ud = require('urban-dictionary');
 const fetch = require("node-fetch");
 const ytdl = require('ytdl-core');
 const glamorous = require("./glam.json")
+const rasputin = require("./rasputin.json")
+const daddy = require("./daddy.json")
+const jeff = require("./jeff.json")
 
 const client = new Discord.Client();
 
@@ -30,6 +33,15 @@ client.on('message', async message => {
 
             args = args.splice(1);
             switch(cmd) {
+                case 'jeff':
+		                execute(message, serverQueue, jeff);
+		                break;
+                case 'daddy':
+		                execute(message, serverQueue, daddy);
+		                break;
+		            case 'rasp':
+		                execute(message, serverQueue, rasputin);
+		                break;
                 case 'glam':
                     execute(message, serverQueue, glamorous);
                     break;
@@ -214,7 +226,7 @@ async function execute(message, serverQueue, songObject) {
     serverQueue.textChannel.send("```CSS\nNow playing: [" + song.title + "]```");
     } catch (e) {
         console.log(e);
-        serverQueue.textChannel.send("```I have encountered an error. pls dont me mad.```");
+        serverQueue.textChannel.send("```I have encountered an error. pls dont me mad. CATCH e, DADDY```");
     }
   }
 
